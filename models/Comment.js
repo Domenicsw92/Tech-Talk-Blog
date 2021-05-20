@@ -21,7 +21,7 @@ Comment.init(
             len: [2]
         }
         },
-        Comment_Date: {
+        comment_Date: {
             type: DataTypes.DATE,
             allowNull: false,
             defaultValue: DataTypes.NOW,
