@@ -1,26 +1,42 @@
 const router = require('express').Router();
-const { Post } = require('../../models');
+const { Post , User} = require('../../models');
 const withAuth = require('../../utils/auth');
 
 router.get('/', (req, res) => {
-  
+
   Post.findAll().then((PostData) => {
-      res.json(PostData);
+    res.json(PostData);
   });
 });
 
 router.get('/:id', async (req, res) => {
-  try {
-      const PostData = await Post.findByPk(req.params.id);
-      if (!PostData) {
-          res.status(404).json({ message: 'No comemnt with this id!' });
-          return;
-      }
-      const post = PostData.get({ plain: true });
-      res.render('post', post);
-  } catch (err) {
-      res.status(500).json(err);
-  };
+  Post.findOne({
+    where: { id: req.params.id },
+    attributes: ['id', 'name', 'description', 'date_created'],
+    include: [{
+      model: User,
+      attributes: ['name'],
+    },
+    {
+      model: Comment,
+      attributes: ['id', 'comment_Text', 'post_id', 'user_id', 'comment_Date'],
+      include: {
+        model: User,
+        attributes: ['name'],
+      },
+    }]
+  }).then((dbPostData) => {
+
+    if (!dbPostData) {
+      res.status(404).json({ message: 'No Post has been found with that id !' });
+      return;
+    }
+    res.status(200).json(dbPostData)
+
+  })
+    .catch(err => {
+      res.status(500, "error here cant find the post").json(err);
+    });
 });
 
 router.post('/', withAuth, async (req, res) => {
@@ -30,38 +46,38 @@ router.post('/', withAuth, async (req, res) => {
       description: req.body.description,
       user_id: req.session.user_id
     },
-    )
+  )
     .then((dbPostData) => {
-        res.json(dbPostData);
+      res.json(dbPostData);
     })
     .catch((err) => {
-        console.log(err, "err 500");
-        res.json(err);
+      console.log(err, "err 500");
+      res.json(err);
     });
 });
 
 
 router.put('/:id', (req, res) => {
-    
+
   Post.update(
-      {
-          
-        description: req.body.description,
+    {
+
+      description: req.body.description,
+    },
+    {
+
+      where: {
+        id: req.params.id,
       },
-      {
-          
-          where: {
-              id: req.params.id,
-          },
-      }
+    }
   )
-      .then((dbPostData) => {
-          res.json(dbPostData);
-      })
-      .catch((err) => {
-          console.log(err);
-          res.json(err);
-      });
+    .then((dbPostData) => {
+      res.json(dbPostData);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.json(err);
+    });
 });
 
 router.delete('/:id', withAuth, async (req, res) => {
@@ -84,4 +100,4 @@ router.delete('/:id', withAuth, async (req, res) => {
   }
 });
 
-module.exports  = router;
+module.exports = router;

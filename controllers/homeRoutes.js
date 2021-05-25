@@ -11,24 +11,24 @@ router.get('/', async (req, res) => {
           model: User,
           attributes: ['name'],
         },
-      {
-        model: Comment,
-        attributes:[ 'id', 'comment_Text', 'post_id', 'user_id', 'comment_Date' ],
-        include:  {
-          model: User,
-          attributes: ['name'],
-        },
-      }
-    ]
+        {
+          model: Comment,
+          attributes: ['id', 'comment_Text', 'post_id', 'user_id', 'comment_Date'],
+          include: {
+            model: User,
+            attributes: ['name'],
+          },
+        }
+      ]
     });
 
     // Serialize data so the template can read it
     const posts = postData.map((post) => post.get({ plain: true }));
 
     // Pass serialized data and session flag into template
-    res.render('homepage', { 
-      posts, 
-      logged_in: req.session.logged_in 
+    res.render('homepage', {
+      posts,
+      logged_in: req.session.logged_in
     });
   } catch (err) {
     res.status(500).json(err);
@@ -36,34 +36,38 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/post/:id', async (req, res) => {
-  try {
-    const postData = await Post.findByPk(req.params.id, {
-      include: [
-        {
-          model: User,
-          attributes: ['name'],
-        },
-        {
-          model: Comment,
-          attributes:[ 'id', 'comment_Text', 'post_id', 'user_id', 'comment_Date' ],
-          include:  {
-            model: User,
-            attributes: ['name'],
-          },
-        }
-      ],
-    });
+  Post.findOne({
+    where: { id: req.params.id },
+    attributes: ['id', 'name', 'description', 'date_created'],
+    include: [{
+      model: User,
+      attributes: ['name'],
+    },
+    {
+      model: Comment,
+      attributes: ['id', 'comment_Text', 'post_id', 'user_id', 'comment_Date'],
+      include: {
+        model: User,
+        attributes: ['name'],
+      },
+    }]
+  }).then((dbPostData) => {
 
-    const post = postData.get({ plain: true });
-
+    if (!dbPostData) {
+      res.status(404).json({ message: 'No Post has been found with that id !' });
+      return;
+    }
+    res.status(200).json(dbPostData).get({ plain: true });
     res.render('post', {
-      ...post,
+      post,
       logged_in: req.session.logged_in
-    });
-  } catch (err) {
-    res.status(500).json(err);
-    console.log("looking up post aint working!!!!!")
-  }
+
+    }); console.log ("can not render post")
+  })
+    .catch(err => {
+      res.status(500).json(err);
+      console.log("looking up post aint working!!!!!")
+    })
 });
 
 // Use withAuth middleware to prevent access to route
