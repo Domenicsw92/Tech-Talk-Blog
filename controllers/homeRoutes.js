@@ -57,9 +57,11 @@ router.get('/post/:id', async (req, res) => {
       res.status(404).json({ message: 'No Post has been found with that id !' });
       return;
     }
+
     res.status(200).json(dbPostData).get({ plain: true });
-    res.render('post', {
-      post,
+
+    res.render( 'post', {
+      posts,
       logged_in: req.session.logged_in
 
     }); console.log ("can not render post")
