@@ -1,15 +1,11 @@
 <div class=" text-center">
-  <h2>{{name}}</h2>
+  <h2>{{post.name}}</h2>
   <p>{{{get_emoji}}}</p>
-  <p>{{description}}</p>
-  <p>Created by {{user.name}} on {{format_date date_created}}</p>
+  <p>{{post.description}}</p>
+  <p>Created by {{post.user.name}} on {{format_date post.date_created}}</p>
   <p>
     <button class="btn btn-primary">Leave a Comment!</button>
   </p>
 </div>
 
-{{comments post.comments}}
 
-{{#if logged_in}}
- <script src="/js/comments.js"></script>
- {{/if}}

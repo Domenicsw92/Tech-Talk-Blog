@@ -58,10 +58,11 @@ router.get('/post/:id', async (req, res) => {
       return;
     }
 
-    res.status(200).json(dbPostData).get({ plain: true });
+    let post =  dbPostData.get({plain: true});
+   // res.status(200).json(dbPostData).get({ plain: true });
 
     res.render( 'post', {
-      posts,
+      post,
       logged_in: req.session.logged_in
 
     }); console.log ("can not render post")
