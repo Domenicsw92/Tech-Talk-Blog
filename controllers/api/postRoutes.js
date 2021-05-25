@@ -1,38 +1,87 @@
 const router = require('express').Router();
-const { Project } = require('../../models');
+const { Post } = require('../../models');
 const withAuth = require('../../utils/auth');
 
-router.post('/', withAuth, async (req, res) => {
-  try {
-    const newProject = await Project.create({
-      ...req.body,
-      user_id: req.session.user_id,
-    });
+router.get('/', (req, res) => {
+  
+  Post.findAll().then((PostData) => {
+      res.json(PostData);
+  });
+});
 
-    res.status(200).json(newProject);
+router.get('/:id', async (req, res) => {
+  try {
+      const PostData = await Post.findByPk(req.params.id);
+      if (!PostData) {
+          res.status(404).json({ message: 'No comemnt with this id!' });
+          return;
+      }
+      const post = PostData.get({ plain: true });
+      res.render('comment', comment);
   } catch (err) {
-    res.status(400).json(err);
-  }
+      res.status(500).json(err);
+  };
+});
+
+router.post('/', withAuth, async (req, res) => {
+  Post.create(
+    {
+      name: req.body.name,
+      description: req.body.description,
+      user_id: req.session.user_id
+    },
+    )
+    .then((dbPostData) => {
+        res.json(dbPostData);
+    })
+    .catch((err) => {
+        console.log(err, "err 500");
+        res.json(err);
+    });
+});
+
+
+router.put('/:id', (req, res) => {
+    
+  Post.update(
+      {
+          
+        description: req.body.description,
+      },
+      {
+          
+          where: {
+              id: req.params.id,
+          },
+      }
+  )
+      .then((dbPostData) => {
+          res.json(dbPostData);
+      })
+      .catch((err) => {
+          console.log(err);
+          res.json(err);
+      });
 });
 
 router.delete('/:id', withAuth, async (req, res) => {
   try {
-    const projectData = await Project.destroy({
+    const postData = await Post.destroy({
       where: {
         id: req.params.id,
         user_id: req.session.user_id,
       },
     });
 
-    if (!projectData) {
-      res.status(404).json({ message: 'No project found with this id!' });
+    if (!postData) {
+      res.status(404).json({ message: 'No post found with this id!' });
       return;
     }
 
-    res.status(200).json(projectData);
+    res.status(200).json(postData);
   } catch (err) {
     res.status(500).json(err);
   }
 });
 
-module.exports = router;
+module.exports  = router;
