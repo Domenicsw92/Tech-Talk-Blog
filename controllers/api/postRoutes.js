@@ -17,7 +17,7 @@ router.get('/:id', async (req, res) => {
           return;
       }
       const post = PostData.get({ plain: true });
-      res.render('comment', comment);
+      res.render('post', post);
   } catch (err) {
       res.status(500).json(err);
   };

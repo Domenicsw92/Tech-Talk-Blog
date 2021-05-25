@@ -5,7 +5,7 @@ const newFormHandler = async (event) => {
   const description = document.querySelector('#post-desc').value.trim();
 
   if (name && description){
-  const response = await fetch(`/api/posts`, {
+  const response = await fetch(`/api/post`, {
     method: 'POST',
     body: JSON.stringify({ name, description }),
     headers: {
@@ -25,7 +25,7 @@ const delButtonHandler = async (event) => {
   if (event.target.hasClass('btn-danger')) {
     const id = event.target.getAttribute('data-id');
 
-    const response = await fetch(`/api/projects/${id}`, {
+    const response = await fetch(`/api/post/${id}`, {
       method: 'DELETE',
     });
 
@@ -41,7 +41,7 @@ const updateButtonHandler = async (event) => {
   if (event.target.hasClass('btn-updateComfirm')) {
     const id = event.target.getAttribute('data-id');
 
-    const response = await fetch(`/api/posts=/${id}`, {
+    const response = await fetch(`/api/post/${id}`, {
       method: 'Put',
       body: JSON.stringify({
         post_id: id,
